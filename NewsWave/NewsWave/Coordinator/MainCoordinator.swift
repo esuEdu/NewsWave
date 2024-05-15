@@ -25,5 +25,4 @@ final class MainCoordinator: Coordinator {
         navigationController.pushViewController(view, animated: true)
     }
     
-    
 }
