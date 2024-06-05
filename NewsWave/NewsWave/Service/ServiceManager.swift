@@ -5,16 +5,66 @@
 //  Created by Eduardo on 15/05/24.
 //
 
+
 import Foundation
+import UIKit
 
 class ServiceManager {
     
+    func downloadData<T: Codable>(url: String = APIEndpoints.language.url()) async -> T? {
+        do {
+            guard let url = URL(string: url) else { throw ServiceError.badUrl }
+            let (data, response) = try await URLSession.shared.data(from: url)
+            guard let response = response as? HTTPURLResponse else { throw ServiceError.badResponse }
+            guard response.statusCode >= 200 && response.statusCode < 300 else { throw ServiceError.badStatus }
+            
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            
+            guard let decodedResponse = try? decoder.decode(T.self, from: data) else { throw ServiceError.failedToDecodeResponse }
+            return decodedResponse
+        } catch ServiceError.badUrl {
+            print("There was an error creating the URL")
+        } catch ServiceError.badResponse {
+            print("Did not get a valid response")
+        } catch ServiceError.badStatus {
+            print("Did not get a 2xx status code from the response")
+        } catch ServiceError.failedToDecodeResponse {
+            print("Failed to decode response into the given type")
+        } catch {
+            print("An error occured downloading the data")
+        }
+        return nil
+    }
     
-    let url = URL(string: "")
+    func downloadImage(from url: URL, completion: @escaping (UIImage?) -> Void) {
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            guard let data = data, error == nil else {
+                completion(nil)
+                return
+            }
+            
+            DispatchQueue.main.async {
+                if let image = UIImage(data: data) {
+                    completion(image)
+                } else {
+                    completion(nil)
+                }
+            }
+        }.resume()
+    }
 
-    
-    //make the api request to news
-    
+    func downloadAndFilterData<T: Filterable>() async -> T? {
+        // Attempt to download data and check if the response is of type T
+        if var response: T = await downloadData() {
+            // Apply the filtering method defined in the Filterable protocol
+            response.filter()
+            
+            return response
+        }
+        // Return nil if the above condition fails
+        return nil
+    }
 }
 
 

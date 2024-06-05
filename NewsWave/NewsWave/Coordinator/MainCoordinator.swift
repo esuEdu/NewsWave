@@ -21,7 +21,8 @@ final class MainCoordinator: Coordinator {
 
     
     func start() {
-        let view = ViewController()
+        let viewModel = NewsListViewModel(serviceManager: self.serviceManager)
+        let view = NewsListViewController(viewModel: viewModel)
         navigationController.pushViewController(view, animated: true)
     }
     

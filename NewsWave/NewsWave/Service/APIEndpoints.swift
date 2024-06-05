@@ -9,6 +9,7 @@ import Foundation
 
 enum APIEndpoints: String {
     case apple = "apple"
+    case language = "language=en"
     
     func url() -> String {
         guard let apiKey = fetchAPIKey() else {
@@ -17,7 +18,7 @@ enum APIEndpoints: String {
         return "\(APIEndpoints.baseURL)\(self.rawValue)&apiKey=\(apiKey)"
     }
     
-    private static let baseURL = "https://newsapi.org/v2/everything?q="
+    private static let baseURL = "https://newsapi.org/v2/top-headlines?"
     
     private func fetchAPIKey() -> String? {
         guard let path = Bundle.main.path(forResource: "apikeys", ofType: "plist"),
